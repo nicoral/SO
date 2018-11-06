@@ -56,10 +56,7 @@ int EspacioLibre(memoria &A)
 	int es=0;
 	for(int i=0;i<A.parti.size();i++)
 	{
-		if(A.parti[i].estado==true)
-		{
-			es+=A.parti[i].tam;
-		}
+		es+=A.parti[i].tam;
 	}
 	return A.tamMax-es;
 }
@@ -92,16 +89,36 @@ void imprimirM(memoria &M,int tem)
 	cout<<"Espacio Libre:"<<EspacioLibre(M)<<endl;
 	cout<<"tiempo:"<<tem<<endl;
 }
-void Pcompactacion(vector<process> &A,int mem)
+
+
+void primer_ajuste(vector<process> &A,memoria &M,int &i){
+	for(int j=0;j<M.parti.size();j++)
+	{
+		if(M.parti[j].estado==false && M.parti[j].tam>=A[i].tama)
+		{
+			M.parti[j].nom=A[i].nom;
+			M.parti[j].tiempo=A[i].Tmemoria;
+			M.parti[j].estado=true;
+			A[i].band=true;
+			break;
+		}
+	}
+}	
+
+
+void Pcompactacion(vector<process> &A,int mem,int ajuste)
 {
 	memoria M;
 	M.tamMax=mem;
 	int tem=0;
 	particiones auxP;
+	//mientras que hayan procesos
 	while(!A.empty())
 	{
+		//metiendo los procesos a la memoria
 		for(int i=0;i<A.size();i++)
 		{
+			//si es el primer proceso
 			if(M.parti.empty())
 			{
 				if(A[i].tama<EspacioLibre(M) && A[i].band==false)
@@ -114,20 +131,31 @@ void Pcompactacion(vector<process> &A,int mem)
 					M.parti.push_back(auxP);
 				}
 			}
+			//si ya hay procesos existentes en memoria
 			else
 			{	
-				/* Ajustes
-				for(int j=0;j<M.parti.size();j++)
-				{
-					if(M.parti[j].estado==false && M.parti[j].tam>=A[i].tama)
+									for(int j=0;j<M.parti.size();j++)
 					{
-						M.parti[j].nom=A[i].nom;
-						M.parti[j].tiempo=A[i].Tmemoria;
-						M.parti[j].estado=true;
-						A[i].band=true;
-						break;
-					}
-				}
+						if(M.parti[j].estado==false && M.parti[j].tam>=A[i].tama)
+						{
+							M.parti[j].nom=A[i].nom;
+							M.parti[j].tiempo=A[i].Tmemoria;
+							M.parti[j].estado=true;
+							A[i].band=true;
+							break;
+						}
+					}/*
+				if(ajuste==1){
+
+
+				}else if(ajuste==2){
+
+				}else if(ajuste==3){
+
+				}else if(ajuste==4)
+				*/
+				/* Ajustes
+
 				*/
 				if(A[i].tama<EspacioLibre(M) && A[i].band==false)
 				{
@@ -194,6 +222,6 @@ int main()
 	aux.tama=50;
 	aux.band=false;
 	v.push_back(aux);
-	Pcompactacion(v,100);
+	Pcompactacion(v,100,1);
 	return 0;
 }
