@@ -91,7 +91,7 @@ void imprimirM(memoria &M,int tem)
 }
 
 
-void primer_ajuste(vector<process> &A,memoria &M,int &i){
+bool primer_ajuste(vector<process> &A,memoria &M,int &i){
 	for(int j=0;j<M.parti.size();j++)
 	{
 		if(M.parti[j].estado==false && M.parti[j].tam>=A[i].tama)
@@ -100,10 +100,56 @@ void primer_ajuste(vector<process> &A,memoria &M,int &i){
 			M.parti[j].tiempo=A[i].Tmemoria;
 			M.parti[j].estado=true;
 			A[i].band=true;
-			break;
+			return true;
 		}
 	}
+	return false;
 }	
+
+bool mejor_ajuste(vector<process> &A,memoria &Memoria,int &i){
+	int size=A[i].tama;
+	int menor=6969,pos=-1;
+	for(int j=0;j<Memoria.parti.size();j++)
+	{
+		//evaluando particiones libres
+		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )		
+			if(abs(size-Memoria.parti[j].tam)<menor){
+				menor=abs(size-Memoria.parti[j].tam);
+				pos=j;
+			}		
+	}
+	if(pos!=-1){
+		Memoria.parti[pos].nom=A[i].nom;
+		Memoria.parti[pos].tiempo=A[i].Tmemoria;
+		Memoria.parti[pos].estado=true;
+		A[i].band=true;
+		return true;
+	}
+	else return false;
+}
+
+bool peor_ajuste(vector<process> &A,memoria &Memoria,int &i){
+	int size=A[i].tama;
+	int mayor=-6969,pos=-1;
+	for(int j=0;j<Memoria.parti.size();j++)
+	{
+		//evaluando particiones libres
+		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )		
+			if(abs(size-Memoria.parti[j].tam)>mayor){
+				mayor=abs(size-Memoria.parti[j].tam);
+				pos=j;
+			}
+	}
+	if(pos!=-1){
+		Memoria.parti[pos].nom=A[i].nom;
+		Memoria.parti[pos].tiempo=A[i].Tmemoria;
+		Memoria.parti[pos].estado=true;
+		A[i].band=true;
+		return true;
+	}
+	else return false;	
+
+}
 
 
 void Pcompactacion(vector<process> &A,int mem,int ajuste)
@@ -112,9 +158,11 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 	M.tamMax=mem;
 	int tem=0;
 	particiones auxP;
+	int cont=0;
 	//mientras que hayan procesos
-	while(!A.empty())
+	while(!A.empty() && cont<10)
 	{
+		cont++;
 		//metiendo los procesos a la memoria
 		for(int i=0;i<A.size();i++)
 		{
@@ -129,22 +177,18 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 					auxP.tiempo=A[i].Tmemoria;
 					auxP.estado=true;
 					M.parti.push_back(auxP);
+					cont=0;
 				}
 			}
 			//si ya hay procesos existentes en memoria
 			else
 			{	
-									for(int j=0;j<M.parti.size();j++)
-					{
-						if(M.parti[j].estado==false && M.parti[j].tam>=A[i].tama)
-						{
-							M.parti[j].nom=A[i].nom;
-							M.parti[j].tiempo=A[i].Tmemoria;
-							M.parti[j].estado=true;
-							A[i].band=true;
-							break;
-						}
-					}/*
+
+				if(peor_ajuste(A,M,i))
+				{
+					cont=0;
+				}
+/*				
 				if(ajuste==1){
 
 
@@ -165,6 +209,7 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 					auxP.tiempo=A[i].Tmemoria;
 					auxP.estado=true;
 					M.parti.push_back(auxP);
+					cont=0;
 				}
 				
 			}
@@ -222,6 +267,6 @@ int main()
 	aux.tama=50;
 	aux.band=false;
 	v.push_back(aux);
-	Pcompactacion(v,100,1);
+	Pcompactacion(v,500,1);
 	return 0;
 }
