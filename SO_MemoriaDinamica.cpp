@@ -88,6 +88,7 @@ void imprimirM(memoria &M,int tem)
 	}
 	cout<<"Espacio Libre:"<<EspacioLibre(M)<<endl;
 	cout<<"tiempo:"<<tem<<endl;
+	cout<<""<<endl;
 }
 
 
@@ -104,7 +105,7 @@ bool primer_ajuste(vector<process> &A,memoria &M,int &i){
 		}
 	}
 	return false;
-}	
+}
 
 bool mejor_ajuste(vector<process> &A,memoria &Memoria,int &i){
 	int size=A[i].tama;
@@ -112,11 +113,11 @@ bool mejor_ajuste(vector<process> &A,memoria &Memoria,int &i){
 	for(int j=0;j<Memoria.parti.size();j++)
 	{
 		//evaluando particiones libres
-		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )		
+		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )
 			if(abs(size-Memoria.parti[j].tam)<menor){
 				menor=abs(size-Memoria.parti[j].tam);
 				pos=j;
-			}		
+			}
 	}
 	if(pos!=-1){
 		Memoria.parti[pos].nom=A[i].nom;
@@ -134,7 +135,7 @@ bool peor_ajuste(vector<process> &A,memoria &Memoria,int &i){
 	for(int j=0;j<Memoria.parti.size();j++)
 	{
 		//evaluando particiones libres
-		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )		
+		if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )
 			if(abs(size-Memoria.parti[j].tam)>mayor){
 				mayor=abs(size-Memoria.parti[j].tam);
 				pos=j;
@@ -147,8 +148,15 @@ bool peor_ajuste(vector<process> &A,memoria &Memoria,int &i){
 		A[i].band=true;
 		return true;
 	}
-	else return false;	
+	else return false;
 
+}
+
+void colocacion(vector<process> &A,memoria &Memoria,int &i,int ajuste){
+    if(ajuste==1){primer_ajuste(A,Memoria,i);}
+    if(ajuste==2){mejor_ajuste(A,Memoria,i);}
+    if(ajuste==3){peor_ajuste(A,Memoria,i);}
+    //if(ajuste==4){peor_ajuste(A,M,i);}
 }
 
 
@@ -182,25 +190,11 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 			}
 			//si ya hay procesos existentes en memoria
 			else
-			{	
+			{
 
-				if(peor_ajuste(A,M,i))
-				{
-					cont=0;
-				}
-/*				
-				if(ajuste==1){
+                colocacion(A,M,i,ajuste);
+                cont=0;
 
-
-				}else if(ajuste==2){
-
-				}else if(ajuste==3){
-
-				}else if(ajuste==4)
-				*/
-				/* Ajustes
-
-				*/
 				if(A[i].tama<EspacioLibre(M) && A[i].band==false)
 				{
 					A[i].band=true;
@@ -211,10 +205,10 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 					M.parti.push_back(auxP);
 					cont=0;
 				}
-				
+
 			}
 		}
-		
+
 		tem++;
 		for(int i=0;i<M.parti.size();i++)
 		{
@@ -227,8 +221,8 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 						borrarProcess(M.parti[j].nom,A);
 						M.parti[j].nom=" ";
 						M.parti[j].estado=false;
-					}	
-				}		
+					}
+				}
 				for(int j=i;j<M.parti.size();j++)
 				{
 					M.parti[j].tiempo-=1;
@@ -253,20 +247,28 @@ int main()
 	vector<process> v;
 	process aux;
 	aux.nom="p1";
-	aux.Tmemoria=5;
-	aux.tama=40;
+	aux.Tmemoria=2;
+	aux.tama=100;
 	aux.band=false;
 	v.push_back(aux);
 	aux.nom="p2";
-	aux.Tmemoria=5;
-	aux.tama=20;
-	aux.band=false;
-	v.push_back(aux);
-	aux.nom="p3";
-	aux.Tmemoria=7;
+	aux.Tmemoria=1;
 	aux.tama=50;
 	aux.band=false;
 	v.push_back(aux);
-	Pcompactacion(v,500,1);
+	aux.nom="p3";
+	aux.Tmemoria=2;
+	aux.tama=40;
+	aux.band=false;
+	v.push_back(aux);
+    aux.nom="p4";
+	aux.Tmemoria=1;
+	aux.tama=20;
+	aux.band=false;
+	v.push_back(aux);
+
+
+
+	Pcompactacion(v,200,1);
 	return 0;
 }
