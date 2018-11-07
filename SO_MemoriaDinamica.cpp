@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
-
+#include <iomanip>
 using namespace std;
 
 
@@ -35,33 +35,9 @@ struct memoria
 		this->tamMax=t;
 	}
 };
-bool huecos(vector<particiones> &A)
-{
-	for(int i=0;i<A.size()-1;i++)
-	{
-		if(A[i].nom==" ")
-		{
-			return true;
-		}
-	}
-	return false;
-}
-int compactar(vector<particiones> &A)
-{
-	int ncompactados=0;
-	while(huecos(A))
-	{
-		for(int i=0;i<A.size();i++)
-		{
-			if(A[i].nom==" " && A[i].estado==false)
-			{
-				ncompactados++;
-				A.erase(A.begin()+i);
-			}
-		}
-	}
-	return ncompactados;
-}
+
+
+
 int EspacioLibre(memoria &A)
 {
 	int es=0;
@@ -93,9 +69,26 @@ bool procesoTerminado(memoria &M)
 }
 void imprimirM(memoria &M,int tem)
 {
+	cout<<setw(0)<< setfill( '-' ) << endl ;
+ 	cout << "| "
+      << left << setw( 25 ) << "Proceso"
+      << "|"
+      << right << setw( 15 ) << "Tamanio"
+      << " | "
+      << left << setw( 12 ) << "Tiempo"
+      << "|";
+    cout  << setfill( '-' ) << endl ;
 	for(int i=0;i<M.parti.size();i++)
 	{
-		cout<<M.parti[i].nom<<" "<<M.parti[i].tam<<" "<<M.parti[i].tiempo<<endl;
+		cout << "| "
+             << setw( 25 ) << M.parti[i].nom
+             << "|"
+             << right << setw( 15 ) << M.parti[i].tam
+             << " | "
+             << left << setw( 12 ) << M.parti[i].tiempo
+             << "|"
+             << endl;
+		//cout<<M.parti[i].nom<<" "<<M.parti[i].tam<<" "<<M.parti[i].tiempo<<endl;
 	}
 	cout<<"Espacio Libre:"<<EspacioLibre(M)<<endl;
 	cout<<"tiempo:"<<tem<<endl;
@@ -170,7 +163,7 @@ bool siguiente_ajuste(vector<process> &A,memoria &Memoria,int &i,int &sig)
 	}
 	else
 	{
-		for(int j=sig;j<Memoria.parti.size();j++)
+		for(int j=sig+1;j<Memoria.parti.size();j++)
 		{
 			if(Memoria.parti[j].estado==false && Memoria.parti[j].tam>=A[i].tama )
 			{
@@ -206,7 +199,7 @@ bool colocacion(vector<process> &A,memoria &Memoria,int &i,int ajuste,int &sig)
 }
 
 
-void Pcompactacion(vector<process> &A,int mem,int ajuste)
+void MemoriaDinamica(vector<process> &A,int mem,int ajuste)
 {
 	memoria M(mem);
 	int tem=0,sig=0;
@@ -258,45 +251,42 @@ void Pcompactacion(vector<process> &A,int mem,int ajuste)
 		}
 		imprimirM(M,tem);
 		tem++;
-		for(int i=0;i<M.parti.size();i++)
+		for(int j=0;j<M.parti.size();j++)
 		{
-			if(M.parti[i].tiempo==0)
+			M.parti[j].tiempo-=1;
+		}
+		for(int j=0;j<M.parti.size();j++)
+		{
+			if(M.parti[j].tiempo==0)
 			{
-				for(int j=i+1;j<M.parti.size();j++)
-				{
-					M.parti[j].tiempo-=1;
-				}
-				for(int j=0;j<M.parti.size();j++)
-				{
-					if(M.parti[j].tiempo==0)
-					{
-						borrarProcess(M.parti[j].nom,A);
-						M.parti[j].nom=" ";
-						M.parti[j].estado=false;
-					}
-				}
-				
-				///ban=false;
-				/**cout<<"1°: "<<endl;
-				imprimirM(M,tem);*/
-				break;
-			}
-			else
-			{
-				M.parti[i].tiempo-=1;
+				borrarProcess(M.parti[j].nom,A);
+				M.parti[j].nom=" ";
+				M.parti[j].estado=false;
 			}
 		}
-		cout<<"2°: "<<endl;
-		imprimirM(M,tem);
-	}
+		imprimirM(M,tem);	
+	}	
 }
 
 int main()
 {
 	vector<process> v;
+
+	int pro;
+	cout<<"--------------------------------------------------"<<endl;
+	cout<<"Manejo de memoria,elija metodo de colocacion. "<<endl;
+	cout<<"Primer Ajuste (1) "<<endl;
+	cout<<"Mejor ajuste(2) "<<endl;
+	cout<<"Peor ajsute(3) "<<endl;
+	cout<<"Siguiente ajuste(4)"<<endl;
+
+	cin>>pro;
+	cout<<"--------------------------------------------------"<<endl;
+
+
 	process aux("p1",2,100);
 	v.push_back(aux);
-	process aux1("p2",1,50);
+	process aux1("p2",2,50);
 	v.push_back(aux1);
 	process aux2("p3",2,40);
 	v.push_back(aux2);
@@ -304,6 +294,10 @@ int main()
 	v.push_back(aux3);
 	process aux4("p5",2,40);
 	v.push_back(aux4);
-	Pcompactacion(v,200,4);
+	/*process aux5("p6",2,120);
+	v.push_back(aux5);*/
+	MemoriaDinamica(v,200,pro);
 	return 0;
+
+
 }
